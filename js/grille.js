@@ -106,7 +106,7 @@ class Grille {
           await new Promise((resolve)=> setTimeout(() => {this.supprimerCookiesMarques(); resolve()},2000));
           this.handleChute();
           
-          this.remplissage(6);
+          this.remplissageGrille(6);
           //isMarked est true, si aucune des deux fonctions ne trouve de match
         } while(isMarked);
       }
@@ -115,14 +115,14 @@ class Grille {
     });
   }
   
-  handleChute(){
+  handleChute(){  // on fait une boucle pour que la fonction qui gère la chute puisse tout faire chuter jusqu'au moment où tout a été fait
     let isChute = false;
     do {
         isChute = this.chuteCookie();
       } while(!isChute);
   }
   
-  marqueCookies(){
+  marqueCookies(){   // on marque tous les cookies qui doivent être supprimés
       return !(this.detecterMatchLignes() && this.detecterMatchColonnes());
   }
 
@@ -140,7 +140,7 @@ class Grille {
    * On verra plus tard pour les améliorations...
    */
 
-  remplirTableauDeCookies(nbDeCookiesDifferents) {
+  remplirTableauDeCookies(nbDeCookiesDifferents) { // on remplit le tabeau de cookies et on vérifie qu'il n'y ai pas de match dès le début
     this.tabCookies = create2DArray(9);
     let isVerified = false;
     for(let l=0;l<this.nbLignes;l++){
@@ -169,14 +169,14 @@ class Grille {
             this.tabCookies[ligne][matchColonne].marquer();
             matchColonne++;
           }
-          colonne = matchColonne;
+          colonne = matchColonne; // on reprend la recherche du dernier cookie faisant partie du groupe "match"
         }
       }
     }
     return match === 0;
   }
 
-  setTime(){
+  setTime(){  // on incrément une variable dans la div "time" pour afficher un décompte en seconde
     let time = document.getElementById("time");
     setInterval(() => {
       time.innerHTML = parseInt(time.innerHTML) + 1;
@@ -188,26 +188,26 @@ class Grille {
     for(let colonne=0;colonne<this.nbColonnes;colonne++){
       for(let ligne=0;ligne<this.nbLignes-2;ligne++){ // on parcoure le tableau
         if(this.tabCookies[ligne][colonne].type === this.tabCookies[ligne+1][colonne].type && this.tabCookies[ligne][colonne].type === this.tabCookies[ligne+2][colonne].type && this.tabCookies[ligne][colonne].isDisplayed === true){
-          // si la condition des 3 cookies similaires est validé, on cherche le nombre de cookie qui ont le même type, en partant de la colonne du premier cookie
+          // si la condition des 3 cookies similaires est validé, on cherche le nombre de cookie qui ont le même type, en partant de la ligne du premier cookie
           match ++;
           let matchLigne = ligne;
           while(matchLigne < this.nbLignes && this.tabCookies[ligne][colonne].type === this.tabCookies[matchLigne][colonne].type){
             this.tabCookies[matchLigne][colonne].marquer();
             matchLigne++;
           }
-          ligne = matchLigne-1;
+          ligne = matchLigne-1; // on reprend la recherche du dernier cookie faisant partie du groupe "match"
         }
       }
     }
     return match === 0;
   }
 
-  updateScore(){
+  updateScore(){  // on gagne un point pour chaque cookie supprimé
     let score = document.getElementById("score");
     score.innerHTML = parseInt(score.innerHTML) + 1; 
   }
 
-  supprimerCookiesMarques(){
+  supprimerCookiesMarques(){   // on supprime tous les cookies qui ont été marqué au préalable => isMarked = true
     for(let ligne=0;ligne<this.nbLignes;ligne++){
       for(let colonne=0;colonne<this.nbColonnes;colonne++){ 
         let cookie = this.tabCookies[ligne][colonne];
@@ -219,7 +219,7 @@ class Grille {
     }
   }
 
-  verifierLigne(nbDeCookiesDifferents){
+  verifierLigne(nbDeCookiesDifferents){  // on vérifie toutes les lignes pour voir si il n'y a pas de groupes de 3 cookies similaires côte à côte
     let nbModif = 0;
     for(let ligne=0;ligne<this.nbLignes;ligne++){
       for(let colonne=0;colonne<this.nbColonnes-2;colonne++){
@@ -236,7 +236,7 @@ class Grille {
     return nbModif === 0;
   }
 
-  verifierColonne(nbDeCookiesDifferents){
+  verifierColonne(nbDeCookiesDifferents){ // on vérifie toutes les colonnes pour voir si il n'y a pas de groupes de 3 cookies similaires côte à côte
     let nbModif = 0;
     for(let colonne=0;colonne<this.nbColonnes;colonne++){
       for(let ligne=0;ligne<this.nbLignes-2;ligne++){ 
@@ -254,7 +254,7 @@ class Grille {
     
   }
 
-  chuteCookie(){
+  chuteCookie(){   // on fait la chute : on décale tous les cookies d'une ligne vers le bas,si on trouve une case vide
     let chute = 0;  
      for(let ligne=0;ligne<this.nbLignes-1;ligne++){
       for(let colonne=0;colonne<this.nbColonnes;colonne++){
@@ -272,7 +272,7 @@ class Grille {
     return chute === 0;
   } 
 
-  genererTypeCookieUnique(tabCookiesVoisins){
+  genererTypeCookieUnique(tabCookiesVoisins){ // on génère un type unique pour éviter les doublons, on utilise cette méthode dans la fonction remplissage grille
     const isFromTheStart = Math.floor(Math.random() - 0.5);
     let type;
     if(isFromTheStart){
@@ -290,7 +290,7 @@ class Grille {
     return type;
   }
 
-  remplissage(nbDeCookiesDifferents){
+  remplissageGrille(nbDeCookiesDifferents){  // On remplit la grille après la chute, et on vérifie qu'il n'y ait pas de doublons
     for(let ligne=0;ligne<this.nbLignes;ligne++){
       for(let colonne=0;colonne<this.nbColonnes;colonne++){
         if(this.tabCookies[ligne][colonne].isDisplayed === false){
